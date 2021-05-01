@@ -228,6 +228,7 @@ Constant pool:
 
 具体代码可参考: [XlassLoader.java](./XlassLoader.java)
 
+代码中可执行文件为MyClassLoader.java
 
 ### 作业3（必做）
 
@@ -251,6 +252,7 @@ JVM进程空间中的内存一般来说包括以下这些部分:
 
 另外，注意区分规范与实现的区别, 需要根据具体实现以及版本, 才能确定。 一般来说，我们的目的是为了排查故障和诊断问题，大致弄清楚这些参数和空间的关系即可。 具体设置时还需要留一些冗余量。
 
+图片存放在resources目录下的jvm.png
 
 ### 4.（选做）
 
@@ -291,6 +293,59 @@ java -Xmx2g -Xms2g -XX:+UseG1GC -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintGCD
 尝试使用课程中介绍的各种工具JDK命令行和图形工具来进行分析。
 
 其中 [GCLogAnalysis.java](./GCLogAnalysis.java) 文件也可以从课件资料zip中找到.
+
+没有找到这个java文件，就使用gateway-server-0.0.1-SNAPSHOT.jar代替下：
+java -jar -Xmx100m -Xms100m -XX:+UseG1GC gateway-server-0.0.1-SNAPSHOT.jar 启动程序
+
+使用jstat -gc pid：
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT
+ 0.0    0.0    0.0    0.0   64512.0   3072.0   37888.0    18349.2   35416.0 33829.5 4696.0 4380.7     12    0.061   2      0.099    0.160
+eden区大小为64512kb，已使用3072kb
+old区大小为37888kb，已使用18349.2kb
+meta区大小为35416kb，已使用33829.5kb
+ccs区大小为4696kb，已使用4380.7kb
+young gc次数为12，花费时间0.061秒
+full gc次数为2，花费时间0.099秒
+gc总耗时0.16秒
+
+使用jstat -gcutil pid：
+   S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT
+  0.00   0.00   4.76  48.43  95.52  93.29     12    0.061     2    0.099    0.160
+eden区已使用4.76%
+old区已使用48.43%
+meta区已使用95.52%
+ccs区已使用93.29%
+后面的内容和-gc打印的一样
+
+使用jmap -heap pid查看jvm内存使用情况：
+Heap Usage:
+G1 Heap:										使用了g1收集器
+   regions  = 100								区块数为100
+   capacity = 104857600 (100.0MB)				总共堆大小为100mb
+   used     = 21935280 (20.919113159179688MB)	已使用堆大小20.9mb
+   free     = 82922320 (79.08088684082031MB)	剩余堆大小79.1mb
+   20.919113159179688% used						已使用堆大小20.9%
+G1 Young Generation:
+Eden Space:										eden区
+   regions  = 3									使用区块3个
+   capacity = 66060288 (63.0MB)					总共内存大小63mb
+   used     = 3145728 (3.0MB)					已使用3mb
+   free     = 62914560 (60.0MB)					剩余60mb
+   4.761904761904762% used						已使用4.7%
+Survivor Space:									survivor区（不使用）
+   regions  = 0									
+   capacity = 0 (0.0MB)
+   used     = 0 (0.0MB)
+   free     = 0 (0.0MB)
+   0.0% used
+G1 Old Generation:								old区
+   regions  = 18								使用区块18个
+   capacity = 38797312 (37.0MB)					总共堆大小为37mb
+   used     = 18789552 (17.919113159179688MB)	已使用17.9mb
+   free     = 20007760 (19.080886840820312MB)	剩余19.1mb
+   48.43003556535051% used						已使用48.4%
+   
+
 
 ## 更多资料
 
